@@ -1,0 +1,130 @@
+package UI;
+
+import javax.swing.*;
+import javax.swing.JLabel;
+import com.github.lgooddatepicker.components.DatePicker;
+
+import PD.*;
+
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import com.github.lgooddatepicker.components.CalendarPanel;
+import java.awt.event.ActionListener;
+import java.time.LocalDate;
+import java.awt.event.ActionEvent;
+import com.github.lgooddatepicker.optionalusertools.CalendarListener;
+import com.github.lgooddatepicker.zinternaltools.CalendarSelectionEvent;
+import com.github.lgooddatepicker.zinternaltools.YearMonthChangeEvent;
+
+public class ItemReportPanel extends JPanel {
+	private JTextField textField_1;
+	CalendarPanel calendarPanel;
+
+	/**
+	 * Create the panel.
+	 */
+	public ItemReportPanel(JFrame currentFrame, Store store) {
+		setLayout(null);
+		this.setVisible(true);
+		JPanel currentPanel = this;
+		JLabel lblItemReports = new JLabel("Item Reports");
+		lblItemReports.setBounds(167, 10, 60, 13);
+		add(lblItemReports);
+		
+		JTextArea textArea = new JTextArea();
+		textArea.setBounds(39, 85, 293, 121);
+		add(textArea);
+		
+		JButton btnGenereate = new JButton("Genereate");
+		btnGenereate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String str = "";
+				str = str + "Item Report For: \n";
+				for (Item item : store.getItems().values())
+				{
+					int x = 0;
+					str += item.getNumber() + item.getDescription() + " ";
+					for (Session s : store.getSessions())
+					{
+						LocalDate j = LocalDate.parse(textField_1.getText());
+						if (s.getStartDateTime().toLocalDate().compareTo(j) == 0)
+						{
+							for (Sale sale : s.getSales())
+							{
+								for (SaleLineItem sli : sale.getSaleLineItems())
+								{
+									if (sli.getItem() == item)
+									{
+										x += sli.getQuantity();
+									}
+								}
+							}
+						}
+						else
+						{
+							x = 0;
+						}
+						
+					}
+					str += x + "\n";
+				}
+				textArea.setText(str);
+				
+			}
+		});
+		btnGenereate.setBounds(78, 216, 85, 21);
+		add(btnGenereate);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				POSHomePanel home = new POSHomePanel(store);
+				currentFrame.getContentPane().removeAll();
+				currentFrame.getContentPane().add(home);
+				currentFrame.revalidate();
+			}
+		});
+		btnCancel.setBounds(202, 216, 85, 21);
+		add(btnCancel);
+		
+		
+		calendarPanel = new CalendarPanel();
+		calendarPanel.addCalendarListener(new CalendarListener() {
+			public void selectedDateChanged(CalendarSelectionEvent arg0) {
+				calendarPanel.setVisible(false);
+				textArea.setVisible(true);
+				textField_1.setVisible(true);
+				btnGenereate.setVisible(true);
+				btnCancel.setVisible(true);
+				textField_1.setText(calendarPanel.getSelectedDate().toString() );
+				
+			}
+			public void yearMonthChanged(YearMonthChangeEvent arg0) {
+			}
+		});
+		calendarPanel.setVisible(false);
+		calendarPanel.setBounds(58, 10, 279, 318);
+		add(calendarPanel);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(110, 48, 96, 19);
+		add(textField_1);
+		textField_1.setColumns(10);
+		
+		JButton button = new JButton("...");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				calendarPanel.setVisible(true);
+				textArea.setVisible(false);
+				textField_1.setVisible(false);
+				btnGenereate.setVisible(false);
+				btnCancel.setVisible(false);
+			}
+		});
+		button.setBounds(212, 47, 48, 21);
+		add(button);
+		
+		
+
+	}
+}
